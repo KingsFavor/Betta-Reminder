@@ -8,7 +8,7 @@ cask "betta" do
   desc "Minimal always-on-top interval reminders for macOS"
   homepage "https://github.com/KingsFavor/Betta-Reminder"
 
-  depends_on macos: ">= :sonoma"
+  depends_on macos: :sonoma
 
   app "Betta.app"
 
