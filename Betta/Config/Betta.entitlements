@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- App Sandbox: 1차 타깃(App Store 호환)을 위해 유지 -->
+	<key>com.apple.security.app-sandbox</key>
+	<true/>
+	<!-- 업데이트 확인용 아웃바운드 HTTPS만 (GitHub Releases API). server 엔타이틀먼트 금지 -->
+	<key>com.apple.security.network.client</key>
+	<true/>
+</dict>
+</plist>
