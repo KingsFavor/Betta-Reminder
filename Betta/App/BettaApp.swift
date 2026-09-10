@@ -16,6 +16,18 @@ struct BettaApp: App {
     /// Auto-relaunches into a Homebrew-upgraded bundle when the app is reactivated.
     @State private var relauncher = UpdateRelauncher()
 
+    /// A menu-bar-sized (18pt) template rendering of the betta mark. Drawn once from
+    /// the (large) asset so the status item is icon-sized, not full-art-sized.
+    private static let menuBarIcon: NSImage = {
+        let size = NSSize(width: 18, height: 18)
+        let icon = NSImage(size: size)
+        icon.lockFocus()
+        NSImage(named: "BettaLogo")?.draw(in: NSRect(origin: .zero, size: size))
+        icon.unlockFocus()
+        icon.isTemplate = true      // tint to match the menu bar (light/dark)
+        return icon
+    }()
+
     var body: some Scene {
         // A single unique window (not WindowGroup) so the Dock icon / "열기" focus
         // the one window instead of spawning duplicates.
@@ -42,11 +54,10 @@ struct BettaApp: App {
             MenuBarContent()
                 .environment(store)
         } label: {
-            Image("BettaLogo")
-                .resizable()
-                .renderingMode(.template)
-                .aspectRatio(contentMode: .fit)
-                .frame(width: 15, height: 15)
+            // The BettaLogo asset's 1x rep is the full-size (huge) art, and MenuBarExtra
+            // sizes the status item to the image's *intrinsic* size — SwiftUI `.frame`
+            // doesn't constrain it. So hand it a pre-scaled template NSImage instead.
+            Image(nsImage: Self.menuBarIcon)
         }
         .menuBarExtraStyle(.window)
 
