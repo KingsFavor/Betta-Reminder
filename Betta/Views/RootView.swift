@@ -26,10 +26,10 @@ struct RootView: View {
         .frame(minWidth: 400, minHeight: 520)
         .background(t.window)
         .provideTheme(scheme)
-        .sheet(item: $route) { route in
-            switch route {
+        .sheet(item: $route) { item in
+            switch item {
             case .new:
-                TemplateGalleryView().provideTheme(scheme)
+                TemplateGalleryView(onFinish: { route = nil }).provideTheme(scheme)
             case .edit(let reminder):
                 NavigationStack {
                     ReminderEditorView(initial: reminder, isNew: false)
@@ -48,12 +48,23 @@ struct RootView: View {
                 .resizable()
                 .renderingMode(.template)
                 .aspectRatio(contentMode: .fit)
-                .frame(width: 22, height: 22)
+                .frame(width: 32, height: 32)
                 .foregroundStyle(t.textPrimary)
             Text("Betta")
-                .font(.system(size: 16, weight: .semibold))
+                .font(.system(size: 18, weight: .semibold))
                 .foregroundStyle(t.textPrimary)
             Spacer()
+            // Always-on-top pin
+            Button { store.alwaysOnTop.toggle() } label: {
+                Image(systemName: store.alwaysOnTop ? "pin.fill" : "pin")
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundStyle(store.alwaysOnTop ? t.accent : t.textSecondary)
+                    .frame(width: 30, height: 30)
+                    .background(store.alwaysOnTop ? t.accentSoft : Color.clear,
+                                in: RoundedRectangle(cornerRadius: 9, style: .continuous))
+            }
+            .buttonStyle(.plain)
+            .help(store.alwaysOnTop ? "항상 위에 고정됨" : "항상 위에 고정")
             SettingsLink {
                 Image(systemName: "gearshape")
                     .font(.system(size: 14, weight: .medium))
@@ -136,7 +147,11 @@ struct RootView: View {
                     ReminderRowView(
                         reminder: reminder,
                         onEdit: { route = .edit(reminder) },
-                        onTest: { PopupPresenter.shared.present(reminder, duration: store.popupDuration) }
+                        onTest: {
+                            PopupPresenter.shared.present(reminder,
+                                                          duration: Double(reminder.popupDurationSeconds),
+                                                          corner: store.popupCorner)
+                        }
                     )
                 }
             }

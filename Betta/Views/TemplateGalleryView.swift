@@ -4,6 +4,9 @@ import SwiftUI
 /// Templates are shown as cards so the special one (사무직 스트레칭) reads as a
 /// richer choice, not just another list item.
 struct TemplateGalleryView: View {
+    /// Called after a new reminder is actually added, to close the whole sheet.
+    var onFinish: () -> Void
+
     @Environment(\.dismiss) private var dismiss
     @Environment(\.theme) private var t
     @State private var chosen: ReminderTemplate?
@@ -30,7 +33,7 @@ struct TemplateGalleryView: View {
                 }
             }
             .navigationDestination(item: $chosen) { template in
-                ReminderEditorView(initial: .seeded(from: template), isNew: true)
+                ReminderEditorView(initial: .seeded(from: template), isNew: true, onComplete: onFinish)
             }
         }
     }

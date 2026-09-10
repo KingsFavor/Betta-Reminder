@@ -44,25 +44,32 @@ enum ReminderTemplate: String, Codable, CaseIterable, Identifiable {
 }
 
 /// One guided stretch shown in the office-stretch popup: a short name, a one-line
-/// cue, and how long to hold. The illustration is the shared `StretchPose` asset;
-/// the pose text rotates so each nudge feels fresh rather than repetitive.
+/// cue, and how long to hold. The poses form an ordered routine (step 1…N); the
+/// popup advances one step each time it fires, and shows the position in the routine
+/// as a dedicated step indicator (not a text list).
 struct StretchPose: Identifiable, Equatable {
     let id: Int
     let name: String
     let cue: String
     let holdSeconds: Int
 
-    /// The rotation of poses the office-stretch template cycles through.
+    /// The ordered stretch routine the office-stretch template steps through.
     static let all: [StretchPose] = [
-        StretchPose(id: 0, name: "목 좌우로 기울이기", cue: "귀를 어깨 쪽으로 천천히", holdSeconds: 20),
-        StretchPose(id: 1, name: "어깨 으쓱 내리기", cue: "귀에서 어깨를 멀리 떨어뜨리며", holdSeconds: 15),
-        StretchPose(id: 2, name: "가슴 열기", cue: "손깍지 끼고 뒤로, 가슴을 펴며", holdSeconds: 20),
-        StretchPose(id: 3, name: "손목 돌리기", cue: "양쪽으로 천천히 크게", holdSeconds: 15),
-        StretchPose(id: 4, name: "허리 비틀기", cue: "의자에 앉아 상체만 좌우로", holdSeconds: 20),
-        StretchPose(id: 5, name: "눈 멀리 보기", cue: "20초간 6m 밖 먼 곳을 응시", holdSeconds: 20),
+        StretchPose(id: 0, name: "목 뒤 근육 늘리기", cue: "깍지 낀 손을 뒤통수에 얹고 턱을 가슴 쪽으로", holdSeconds: 20),
+        StretchPose(id: 1, name: "턱 당기기", cue: "턱을 뒤로 당겨 이중턱을 만들 듯 5초씩", holdSeconds: 15),
+        StretchPose(id: 2, name: "옆 목 스트레칭", cue: "한 손으로 반대쪽 머리를 어깨 쪽으로 당기며", holdSeconds: 20),
+        StretchPose(id: 3, name: "어깨 으쓱 스트레칭", cue: "어깨를 귀까지 올렸다가 툭 내려놓기", holdSeconds: 15),
+        StretchPose(id: 4, name: "가슴 펴기 스트레칭", cue: "손을 등 뒤로 깍지 끼고 가슴을 활짝 열며", holdSeconds: 20),
     ]
+
+    static var count: Int { all.count }
 
     static func pose(at index: Int) -> StretchPose {
         all[((index % all.count) + all.count) % all.count]
+    }
+
+    /// 1-based step number within the routine for a given rotation cursor.
+    static func step(at index: Int) -> Int {
+        ((index % all.count) + all.count) % all.count + 1
     }
 }

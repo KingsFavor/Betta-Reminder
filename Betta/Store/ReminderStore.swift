@@ -11,13 +11,19 @@ import Observation
 final class ReminderStore {
     private(set) var reminders: [Reminder] = []
 
-    /// How long a popup stays on screen before it fades away on its own (seconds).
-    var popupDuration: Double {
-        didSet { UserDefaults.standard.set(popupDuration, forKey: Keys.popupDuration) }
+    /// Which screen corner popups anchor to (applies to all reminders).
+    var popupCorner: PopupCorner {
+        didSet { UserDefaults.standard.set(popupCorner.rawValue, forKey: Keys.popupCorner) }
+    }
+
+    /// Keep the main window floating above other apps' windows.
+    var alwaysOnTop: Bool {
+        didSet { UserDefaults.standard.set(alwaysOnTop, forKey: Keys.alwaysOnTop) }
     }
 
     private enum Keys {
-        static let popupDuration = "popup.durationSeconds"
+        static let popupCorner = "popup.corner"
+        static let alwaysOnTop = "window.alwaysOnTop"
     }
 
     private let fileURL: URL
@@ -31,8 +37,9 @@ final class ReminderStore {
         try? fm.createDirectory(at: dir, withIntermediateDirectories: true)
         self.fileURL = dir.appendingPathComponent("reminders.json")
 
-        let stored = UserDefaults.standard.double(forKey: Keys.popupDuration)
-        self.popupDuration = stored > 0 ? stored : 20
+        let raw = UserDefaults.standard.string(forKey: Keys.popupCorner)
+        self.popupCorner = raw.flatMap(PopupCorner.init(rawValue:)) ?? .topRight
+        self.alwaysOnTop = UserDefaults.standard.bool(forKey: Keys.alwaysOnTop)
 
         load()
     }

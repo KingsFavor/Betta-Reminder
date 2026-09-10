@@ -46,13 +46,31 @@ struct SchedulePickerView: View {
                     .buttonStyle(.plain)
                 }
             }
-            // Fine control
-            Stepper(value: $schedule.intervalMinutes, in: 5...600, step: 5) {
-                Text("직접 조정 · 5분 단위")
+            // Direct numeric entry (minutes)
+            HStack(spacing: 8) {
+                Text("직접 입력")
                     .font(.system(size: 12))
                     .foregroundStyle(t.textMuted)
+                Spacer()
+                TextField("분", value: clampedInterval, format: .number)
+                    .textFieldStyle(.plain)
+                    .multilineTextAlignment(.trailing)
+                    .font(.system(size: 14, weight: .semibold, design: .rounded))
+                    .monospacedDigit()
+                    .frame(width: 52)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 7)
+                    .background(t.panel, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+                Text("분")
+                    .font(.system(size: 12))
+                    .foregroundStyle(t.textSecondary)
             }
         }
+    }
+
+    private var clampedInterval: Binding<Int> {
+        Binding(get: { schedule.intervalMinutes },
+                set: { schedule.intervalMinutes = min(1440, max(1, $0)) })
     }
 
     // MARK: Active window
@@ -71,19 +89,6 @@ struct SchedulePickerView: View {
             })
     }
 
-    private func minuteBinding(_ keyPath: WritableKeyPath<Schedule, Int>) -> Binding<Date> {
-        Binding(
-            get: {
-                let cal = Calendar.current
-                let m = schedule[keyPath: keyPath]
-                return cal.date(bySettingHour: (m / 60) % 24, minute: m % 60, second: 0, of: Date()) ?? Date()
-            },
-            set: { date in
-                let c = Calendar.current.dateComponents([.hour, .minute], from: date)
-                schedule[keyPath: keyPath] = (c.hour ?? 0) * 60 + (c.minute ?? 0)
-            })
-    }
-
     private var activeWindow: some View {
         VStack(alignment: .leading, spacing: 9) {
             HStack {
@@ -96,13 +101,11 @@ struct SchedulePickerView: View {
             }
             if !schedule.isAllDay {
                 HStack(spacing: 10) {
-                    DatePicker("", selection: minuteBinding(\.activeStartMinute), displayedComponents: .hourAndMinute)
-                        .labelsHidden()
+                    TimeSelector(minutes: $schedule.activeStartMinute)
                     Image(systemName: "arrow.right")
                         .font(.system(size: 11, weight: .semibold))
                         .foregroundStyle(t.textMuted)
-                    DatePicker("", selection: minuteBinding(\.activeEndMinute), displayedComponents: .hourAndMinute)
-                        .labelsHidden()
+                    TimeSelector(minutes: $schedule.activeEndMinute)
                     Spacer()
                 }
             }

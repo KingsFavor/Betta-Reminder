@@ -21,6 +21,7 @@ struct BettaApp: App {
             RootView()
                 .environment(store)
                 .environment(updates)
+                .background(WindowConfigurator(store: store))
                 .task {
                     if engine == nil {
                         let engine = ReminderEngine(store: store)
@@ -42,7 +43,7 @@ struct BettaApp: App {
                 .resizable()
                 .renderingMode(.template)
                 .aspectRatio(contentMode: .fit)
-                .frame(width: 18, height: 18)
+                .frame(width: 15, height: 15)
         }
         .menuBarExtraStyle(.window)
 
