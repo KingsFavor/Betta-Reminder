@@ -13,6 +13,8 @@ struct BettaApp: App {
     /// The scheduling tick. Held at App scope so it keeps running even when the
     /// window is closed (the app lives on in the menu bar).
     @State private var engine: ReminderEngine?
+    /// Auto-relaunches into a Homebrew-upgraded bundle when the app is reactivated.
+    @State private var relauncher = UpdateRelauncher()
 
     var body: some Scene {
         // A single unique window (not WindowGroup) so the Dock icon / "열기" focus
@@ -27,6 +29,7 @@ struct BettaApp: App {
                         let engine = ReminderEngine(store: store)
                         engine.start()
                         self.engine = engine
+                        relauncher.start()
                     }
                     updates.checkOnLaunch()
                 }
