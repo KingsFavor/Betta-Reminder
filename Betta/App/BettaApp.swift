@@ -16,15 +16,18 @@ struct BettaApp: App {
     /// Auto-relaunches into a Homebrew-upgraded bundle when the app is reactivated.
     @State private var relauncher = UpdateRelauncher()
 
-    /// A menu-bar template rendering of the betta mark, drawn from the *tightly
-    /// cropped* MenuBarIcon asset (the fish fills the frame — no baked-in whitespace),
-    /// at ~full menu-bar height. macOS caps the icon at the bar's height, so this is
-    /// about as large as a menu-bar icon can be.
+    /// A menu-bar template rendering of the betta mark. The MenuBarIcon asset frames
+    /// the *visible* fish (faint outer fin wisps trimmed), so the fish fills the frame
+    /// with no baked-in whitespace. Drawn preserving aspect at ~full menu-bar height;
+    /// macOS caps the icon at the bar's height, so this is about as large as it gets.
     private static let menuBarIcon: NSImage = {
-        let size = NSSize(width: 30, height: 30)
+        guard let src = NSImage(named: "MenuBarIcon") else { return NSImage() }
+        let height: CGFloat = 26
+        let aspect = src.size.width / max(1, src.size.height)
+        let size = NSSize(width: (height * aspect).rounded(), height: height)
         let icon = NSImage(size: size)
         icon.lockFocus()
-        NSImage(named: "MenuBarIcon")?.draw(in: NSRect(origin: .zero, size: size))
+        src.draw(in: NSRect(origin: .zero, size: size))
         icon.unlockFocus()
         icon.isTemplate = true      // tint to match the menu bar (light/dark)
         return icon
