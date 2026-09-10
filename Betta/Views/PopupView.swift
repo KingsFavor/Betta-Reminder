@@ -53,10 +53,8 @@ struct PopupView: View {
 
     // MARK: Rich — office stretch
 
-    private var pose: StretchPose { StretchPose.pose(at: reminder.richCursor) }
-    private var step: Int { StretchPose.step(at: reminder.richCursor) }
-    private var totalSteps: Int { StretchPose.count }
-
+    /// The whole routine shown at once: one large illustration, then every stretch as
+    /// a numbered row. The popup is free to grow tall — the panel sizes to fit.
     private var stretch: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 8) {
@@ -70,72 +68,51 @@ struct PopupView: View {
                 closeButton
             }
 
-            // Order indicator — the routine as connected numbered steps.
-            stepTrack
-
             Image("StretchPose")
                 .resizable()
                 .aspectRatio(contentMode: .fit)
                 .frame(maxWidth: .infinity)
-                .frame(height: 188)
+                .frame(height: 176)
                 .background(t.cardMuted)
                 .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
 
-            HStack(alignment: .firstTextBaseline, spacing: 8) {
-                Text("\(step)")
-                    .font(.system(size: 15, weight: .bold, design: .rounded))
-                    .foregroundStyle(t.onAccent)
-                    .frame(width: 24, height: 24)
-                    .background(t.accent, in: Circle())
-                VStack(alignment: .leading, spacing: 3) {
-                    Text(pose.name)
-                        .font(.system(size: 17, weight: .semibold))
-                        .foregroundStyle(t.textPrimary)
-                    Text(pose.cue)
-                        .font(.system(size: 13))
-                        .foregroundStyle(t.textSecondary)
-                        .fixedSize(horizontal: false, vertical: true)
+            VStack(spacing: 0) {
+                ForEach(Array(StretchPose.all.enumerated()), id: \.element.id) { index, p in
+                    poseRow(number: index + 1, pose: p)
+                    if index < StretchPose.all.count - 1 {
+                        Divider().overlay(t.divider)
+                    }
                 }
             }
-
-            HStack(spacing: 6) {
-                Image(systemName: "timer")
-                    .font(.system(size: 11, weight: .semibold))
-                Text("\(pose.holdSeconds)초 유지")
-                    .font(.system(size: 12, weight: .medium))
-            }
-            .foregroundStyle(t.accent)
-            .padding(.horizontal, 9)
-            .padding(.vertical, 5)
-            .background(t.accentSoft, in: Capsule())
+            .padding(.vertical, 2)
+            .background(t.cardMuted, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
         }
     }
 
-    /// The routine order as numbered nodes joined by connectors; the current step is
-    /// filled and enlarged, done steps filled soft, upcoming steps outlined.
-    private var stepTrack: some View {
-        HStack(spacing: 0) {
-            ForEach(1...totalSteps, id: \.self) { i in
-                let state: Int = i < step ? -1 : (i == step ? 0 : 1)   // done / current / upcoming
-                ZStack {
-                    Circle()
-                        .fill(state == 0 ? t.accent : (state < 0 ? t.accentSoft : Color.clear))
-                        .overlay(Circle().strokeBorder(state > 0 ? t.textFaint : Color.clear, lineWidth: 1.5))
-                        .frame(width: state == 0 ? 24 : 18, height: state == 0 ? 24 : 18)
-                    Text("\(i)")
-                        .font(.system(size: state == 0 ? 12 : 10, weight: .bold, design: .rounded))
-                        .foregroundStyle(state == 0 ? t.onAccent : (state < 0 ? t.accent : t.textMuted))
-                }
-                .frame(width: 26)
-                if i < totalSteps {
-                    Rectangle()
-                        .fill(i < step ? t.accent.opacity(0.5) : t.divider)
-                        .frame(height: 1.5)
-                        .frame(maxWidth: .infinity)
-                }
+    private func poseRow(number: Int, pose: StretchPose) -> some View {
+        HStack(alignment: .top, spacing: 10) {
+            Text("\(number)")
+                .font(.system(size: 12, weight: .bold, design: .rounded))
+                .foregroundStyle(t.onAccent)
+                .frame(width: 22, height: 22)
+                .background(t.accent, in: Circle())
+            VStack(alignment: .leading, spacing: 2) {
+                Text(pose.name)
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(t.textPrimary)
+                Text(pose.cue)
+                    .font(.system(size: 12))
+                    .foregroundStyle(t.textSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
             }
+            Spacer(minLength: 6)
+            Text("\(pose.holdSeconds)초")
+                .font(.system(size: 11, weight: .semibold))
+                .foregroundStyle(t.accent)
+                .monospacedDigit()
         }
-        .frame(maxWidth: .infinity)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 9)
     }
 
     // MARK: Pieces

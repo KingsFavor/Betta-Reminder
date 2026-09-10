@@ -53,15 +53,12 @@ final class ReminderEngine {
         }
     }
 
-    /// Fire one reminder now: show its popup and advance a rich template's rotation
-    /// (only when a popup actually appeared — a de-duplicated re-fire leaves it be).
+    /// Fire one reminder now: show its popup (the office-stretch template shows the
+    /// whole routine at once, so there's no per-fire rotation to advance).
     private func fire(_ reminder: Reminder) {
-        let shown = presenter.present(reminder,
-                                      duration: Double(reminder.popupDurationSeconds),
-                                      corner: store.popupCorner)
-        if shown && reminder.template.isRich {
-            store.advanceRichCursor(reminder.id)
-        }
+        presenter.present(reminder,
+                          duration: Double(reminder.popupDurationSeconds),
+                          corner: store.popupCorner)
     }
 
     /// The "테스트" action: show exactly how this reminder will look, right now,
