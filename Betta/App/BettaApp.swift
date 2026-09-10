@@ -21,7 +21,7 @@ struct BettaApp: App {
     /// at ~full menu-bar height. macOS caps the icon at the bar's height, so this is
     /// about as large as a menu-bar icon can be.
     private static let menuBarIcon: NSImage = {
-        let size = NSSize(width: 24, height: 24)
+        let size = NSSize(width: 30, height: 30)
         let icon = NSImage(size: size)
         icon.lockFocus()
         NSImage(named: "MenuBarIcon")?.draw(in: NSRect(origin: .zero, size: size))
